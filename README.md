@@ -195,6 +195,6 @@ Bu sistem bir **akademik bitirme projesi** ve **karar destek aracı** olarak gel
 
 ## 👨‍💻 Geliştirici
 
-**Alper Çakır**  
+**Alperen Çukurova**  
 Bilgisayar Mühendisliği Bitirme Projesi  
 2026
