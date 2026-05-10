@@ -1,0 +1,60 @@
+1- simple_linear_oblique Düz ve eğik kırıklar ve incomplete_greenstick Tam ayrılmamış, yaş ağaç kırıkları sınıflarını birleştirdik çünkü her iki kırık tipinde de kemik parçalanmıyor sadece bir hat oluşuyor
+
+2- complex_comminuted (Çok parçalı kırıklar) ve compression_pathological Ezilme ve hastalık kaynaklı kırıklar, modelin daha iyi anlayabilmesini sağlamak için bu sınıfları birleştirdik
+
+3- avulsion: (Kemiğin küçük bir parçasının kopması) -> Olduğu gibi kaldı.
+
+4- diclocation_articular: (Eklem çıkıkları ve eklem içi kırıklar) -> Olduğu gibi kaldı.
+
+5- kırık türlerini aciliyet ve ağru skalası yaparsak 1-5 arası
+
+Compression/pathological 5 puan olarak -> Aciliyet durumu (Çok yüksek) Kemik ezilmiş veya hastalıklıdır. Omurga gibi bölgelerde sinir hasarı riski taşır.
+
+Diclocation / Articular 4 puan olarak -> Aciliyet Durumu (Yüksek) Eklem yüzeyini bozar. Hızlı müdahale edilmezse kalıcı eklem hasarı ve kireçlenme yapar.
+
+Avulsion -> 3 puan olarak -> Aciliyet Durumu (Orta) Tendon kemikten parça koparmıştır. Ağrılıdır ama hayati risk veya büyük deformasyon düşüktür.
+
+Simple Linear/Oblique -> 2 puan olarak -> Aciliyet Durumu (Düşük/Orta) Kemik nispeten stabil kalmıştır. Genelde alçı ile iyileşme oranı çok yüksektir.
+
+Bölge Numaralandırması
+
+Kritik Bölgeler (Puan: 5): Kafatası, Omurga (Spine), Pelvis (Kalça). Buralardaki kırıklar felç veya iç kanama riski taşır.
+Yüksek Riskli (Puan: 4): Femur (Uyluk), Göğüs Kafesi (Kaburga - akciğer yaralanması riski).
+Orta/Düşük Risk (Puan: 3): El bileği, ayak parmakları, ön kol.
+
+
+Kırık Sayısı (Csayi)
+1 kırık varken -> 1.0, 2 kırık varken -> 1.3 , 3+ kırık varken -> 1.6
+
+
+Aciliyet Algoritması
+
+	Kırık Tipi Puanı (Stip)
+	Kırık Sayısı Çarpanı (Csayi)
+	Anatomik Bölge (Sbölge)
+
+	Algoritma Formulü (Stip x Csayi) + Sbölge
+
+burada kırık sayısını Yolo üzerinden eğittiğimiz model üzerinden alacağız
+
+mantık şöyle işleyecek fotoğraf ilk olarak Kırık var mı yok mu Modeline gidecek ve orada model yok derse kullanıcıya kırık yok cevabı dönecek.
+
+model kırık var derse eğer ki sonrasında yolo modeli ile önce kaç kırık var onu öğreneceğiz sonrasında ise kırık türü modeline gidecek ve kırık türünü öğrenip sonrasında anatomik bölge sınıflandırmasında hangi bölgede olduğunu öğrenip aciliyet algoritmasına uygulayacağız
+
+
+
+
+
+Aciliyet Algoritmasından çıkan sonuca göre aralık
+
+
+11.0 - 13.0 - SEVİYE 1: KRİTİK - Kırmızı - Hayati Tehlike: Resüsitasyon gerektirir. Derhal ameliyathane veya yoğun bakım hazırlığı.
+
+8.5 - 10.9 - SEVİYE 2: Çok Acil - Turuncu - Yüksek Öncelik: Maksimum 10-15 dk içinde uzman doktor müdahalesi. Ciddi stabilite kaybı.
+
+6.5 - 8.4 - SEVİYE 3: ACİL - SARI - Orta Öncelik: Hastanın durumu stabil ancak cerrahi sınırda. 1 saat içinde müdahale
+
+5.0 - 6.4 - SEVİYE 4: STANDART - Yeşil - Düşük Öncelik: Hayati risk yok. Ayaktan tedavi veya rutin alçı/atel işlemleri.
+
+
+

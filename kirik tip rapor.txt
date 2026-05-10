@@ -1,0 +1,228 @@
+toplam 12 sınıf vardı ve toplam görüntü sayısı çoğaltılmamış hali ile birlikte 1390 görüntü var
+
+sınıflar 
+Avulsion --
+Comminuted --
+Compression-Crush
+Dislocation
+Greenstick--
+Hairline --
+İmpacted --
+İntra-Articular
+Longitudinal--
+Oblique--
+Pathological
+Spiral --
+
+Avulsion: Tendonun kemikten parça koparması.
+Comminuted: Kemiğin 3 veya daha fazla parçaya ayrılması.
+Compression-Crush: Kemiğin kendi üstüne çökerek ezilmesi (genelde omurgada).
+Dislocation: Eklemin yerinden çıkması.
+Greenstick: Kemik tam kırılmaz, yaş bir dal gibi eğilir veya tek taraflı çatlar (çocuklarda sık görülür).
+Hairline: Çok ince, saç teli gibi bir çatlak.
+Impacted: Kırılan kemik uçlarının birbirinin içine girmesi.
+Intra-Articular: Kırık hattının eklem boşluğuna kadar uzanması.
+Longitudinal: Kemiğin uzunlamasına (boyuna) çatlaması.
+Oblique: Kemik boyunca eğik bir açıyla oluşan kırık.
+Pathological: Zayıflamış kemikte (tümör vb.) oluşan hastalık kaynaklı kırık.
+Spiral: Kemiğin kendi etrafında burulmasıyla oluşan sarmal kırık.
+
+
+12 sınıf ile eğitildiğinde model doğruluk oranları çok az geldi ve overfitting yaptı
+
+ilk başta bunları 6 sınıf olacak şekilde tekrardan birleştirdim bunu yaparken kırık tiplerinin birleştirilmesi şunlara göre yapıldı
+1- avulsion bu tek başına duruyor çünkü bu kırıklar bir tendon veya bağın kemikten bir parça kopmasıyla oluşur
+
+2- comminuted - impacted - spiral
+	mantık: bu üç tip kemikğin yüksek enerjiyle ciddi şekilde hasar aldığı durumları temsil eder
+	comminuted: kemiğin ikiden fazla parçaua ayrılması
+	spiral ve impacted: kırıklar genellikle müdahale gerektiren, kemik bütünlüğünün çoklu düzlemlerde bozulduğu "kompleks" vakalar grubuna girer
+
+3- compression - pathological
+Mantık: Genellikle omurga veya süngerimsi kemiklerde görülen, kemiğin kendi üzerine çökmesi durumudur.
+
+Patolojik kırıklar (tümör veya erime kaynaklı) genellikle kemik yapısı zayıfladığı için "compression" (çökme) şeklinde kendini gösterir. Bu yüzden morfolojik olarak birbirlerine benzerler.
+
+4- Dislocation (Çıkıklı Kırıklar)
+Birleşenler: Fracture Dislocation (Kırıklı çıkık), Intra-articular (Eklem içi).
+
+Mantık: Bu sınıf eklem bölgelerini hedefler.
+
+Intra-articular kırıklar direkt eklem yüzeyini keser.
+
+Fracture Dislocation ise eklemin yerinden çıkmasıyla beraber görülen kırıktır. Her iki durumda da odak noktası eklem harabiyetidir.
+
+
+5- Incomplete / Hairline (Tam Olmayan Kırıklar)
+Birleşenler: Greenstick (Yaş ağaç), Hairline (Kılcal).
+
+Mantık: Kemik bütünlüğünün tamamen kaybolmadığı, "çatlak" veya "kısmi kırık" seviyesindeki vakalardır.
+
+Greenstick çocuklarda görülen, kemiğin bükülüp tam kırılmadığı tiptir.
+
+Hairline ise çok ince bir hat şeklindedir. Modelin bu "hafif" hasarları ayırt etmesi için bu birleştirme ideal.
+
+
+
+6- Simple Linear (Basit Çizgisel)
+Birleşenler: Longitudinal (Boyuna), Oblique (Eğik).
+
+Mantık: Kemiğin net bir hat boyunca, parçalanmadan ikiye ayrıldığı durumlardır.
+
+Longitudinal dikine, Oblique ise açılı bir çizgi çizer. Görsel olarak her ikisi de temiz, tek hatlı kırıklar olduğu için "Simple Linear" (Basit Doğrusal) çatısı altında toplanmış.
+
+
+
+
+
+Ana Sınıf,Birleştirilme Nedeni
+Complex,Çoklu parça ve yüksek enerjili hasar.
+Compression,Kemik dokusunun kendi içine çökmesi/ezilmesi.
+Dislocation,Eklem yüzeyi ve eklem stabilitesinin bozulması.
+Incomplete,"Kemiğin tam olarak ayrılmadığı, stabil kırıklar."
+Simple Linear,Tek ve net bir hat boyunca ayrılma.
+
+
+
+görüntüler %80 train %10 test ve %10 valid olarak bölündü
+
+
+Train (Eğitim): ~1112 görüntü (Modelin ana ders kitabı)
+Valid (Doğrulama): ~139 görüntü (Eğitim sırasında overfitting kontrolü)
+Test (Sınav): ~139 görüntü (Final başarısını ölçmek için)
+
+görüntü boyularını 300x300 yaptım
+RGB ye çevirdim 
+efficientnet b3 kullandım
+
+eğitim sonuçları ve kod masaüstünde 6 sinif için kirik tip txt dosyasında
+
+
+
+
+
+sonrasında sınıf sayısını 4 e düşürdük 
+
+1- basit ve stabil kırıklar
+	greenstick - hairline - longitudinal - oblique - spiral = simple_linear_oblique
+Bu kırıkların ortak özelliği, kemiğin bütünlüğünün büyük oranda korunması ve parçalanmanın olmamasıdır. Model bunları "tek hatlı/basit yapı" olarak çok daha rahat öğreniyor.
+
+2- parçalı ve riskli kırıklar
+	comminuted - compression crush - impacted - pathological = compression_pathological
+Burada kemik dokusu ciddi hasar görmüş, ezilmiş veya birden fazla parçaya ayrılmıştır. Bu görüntüler görsel olarak birbirine çok yakındır (kaotik kemik yapısı). Model bu "karışıklığı" tek grupta daha iyi anlıyor.
+
+3- eklem ve çıkık bazlı kırıklar
+	dilocation - intra articular = discolation_articular
+Her iki durum da doğrudan eklem yüzeyini ve stabilitesini bozar. Klinik olarak müdahale yöntemleri ve aciliyetleri (eklem kireçlenmesini önlemek için) aynıdır.
+
+4- kopma tipi kırıklar
+	avulsion = avulsion
+Bu tip, tendona bağlı bir kemik parçasının ana kemikten kopmasıdır. Görsel yapısı çok karakteristiktir (kemik kenarında küçük bir "ada" gibi durur). Diğerleriyle birleştirmek modelin kafasını karıştıracağı için tek bıraktık.
+
+
+
+"Bu 12 sınıfı neden 4'e indirdik?" sorusuna, "Gördüğünüz gibi morfolojik yapılar birbirine çok yakın, bu da modelin 'overfitting' yapmasına veya yanlış sınıfa odaklanmasına neden oluyordu" diyerek bu görsel üzerinden çok sağlam bir savunma yapabilirsin.
+
+
+4 sınıfa indirdikte sonraki eğitim durumları masaüstünde 4 sinif kirik tip txt dosyasında 
+
+
+
+sonrasında 
+Compression/pathological 5 puan olarak -> Aciliyet durumu (Çok yüksek) Kemik ezilmiş veya hastalıklıdır. Omurga gibi bölgelerde sinir hasarı riski taşır.
+
+Diclocation / Articular 4 puan olarak -> Aciliyet Durumu (Yüksek) Eklem yüzeyini bozar. Hızlı müdahale edilmezse kalıcı eklem hasarı ve kireçlenme yapar.
+
+Avulsion -> 3 puan olarak -> Aciliyet Durumu (Orta) Tendon kemikten parça koparmıştır. Ağrılıdır ama hayati risk veya büyük deformasyon düşüktür.
+
+Simple Linear/Oblique -> 2 puan olarak -> Aciliyet Durumu (Düşük/Orta) Kemik nispeten stabil kalmıştır. Genelde alçı ile iyileşme oranı çok yüksektir.
+
+Bölge Numaralandırması
+
+Kritik Bölgeler (Puan: 5): Kafatası, Omurga (Spine), Pelvis (Kalça). Buralardaki kırıklar felç veya iç kanama riski taşır.
+Yüksek Riskli (Puan: 4): Femur (Uyluk), Göğüs Kafesi (Kaburga - akciğer yaralanması riski).
+Orta/Düşük Risk (Puan: 3): El bileği, ayak parmakları, ön kol.
+
+
+Kırık Sayısı (Csayi)
+1 kırık varken -> 1.0, 2 kırık varken -> 1.3 , 3+ kırık varken -> 1.6
+
+
+Aciliyet Algoritması
+
+	Kırık Tipi Puanı (Stip)
+	Kırık Sayısı Çarpanı (Csayi)
+	Anatomik Bölge (Sbölge)
+
+	Algoritma Formulü (Stip x Csayi) + Sbölge
+
+burada kırık sayısını Yolo üzerinden eğittiğimiz model üzerinden alacağız
+
+mantık şöyle işleyecek fotoğraf ilk olarak Kırık var mı yok mu Modeline gidecek ve orada model yok derse kullanıcıya kırık yok cevabı dönecek.
+
+model kırık var derse eğer ki sonrasında yolo modeli ile önce kaç kırık var onu öğreneceğiz sonrasında ise kırık türü modeline gidecek ve kırık türünü öğrenip sonrasında anatomik bölge sınıflandırmasında hangi bölgede olduğunu öğrenip aciliyet algoritmasına uygulayacağız
+
+
+
+
+
+Aciliyet Algoritmasından çıkan sonuca göre aralık
+
+
+11.0 - 13.0 - SEVİYE 1: KRİTİK - Kırmızı - Hayati Tehlike: Resüsitasyon gerektirir. Derhal ameliyathane veya yoğun bakım hazırlığı.
+
+8.5 - 10.9 - SEVİYE 2: Çok Acil - Turuncu - Yüksek Öncelik: Maksimum 10-15 dk içinde uzman doktor müdahalesi. Ciddi stabilite kaybı.
+
+6.5 - 8.4 - SEVİYE 3: ACİL - SARI - Orta Öncelik: Hastanın durumu stabil ancak cerrahi sınırda. 1 saat içinde müdahale
+
+5.0 - 6.4 - SEVİYE 4: STANDART - Yeşil - Düşük Öncelik: Hayati risk yok. Ayaktan tedavi veya rutin alçı/atel işlemleri.
+
+
+
+Kırık Tipi Puanlaması ($S_{tip}$) – Morfolojik ŞiddetBu puanlama, kırığın kemik dokusuna verdiği fiziksel hasarın derinliğini temsil eder.Compression / Pathological (5 Puan): * Neden 5? Kemiğin kendi üzerine çökmesi (ezilme), genellikle geri dönüşü zor olan doku kayıplarına yol açar. Patolojik olması ise kemiğin kanser veya ağır enfeksiyon gibi bir sebeple zayıfladığını gösterir; bu da sistemik bir kriz demektir.Dislocation / Articular (4 Puan): * Neden 4? Eklem içi kırıklar, vücudun mekanik hareket merkezini bozar. Müdahale gecikirse "eklem donması" veya kalıcı kireçlenme (artroz) kaçınılmazdır. Acil cerrahi potansiyeli çok yüksektir.Avulsion (3 Puan): * Neden 3? Kasın kemikten parça koparmasıdır. Fonksiyonel bir kayıptır, hastaya çok acı çektirir ama hayati bir organı (beyin, akciğer vb.) doğrudan tehdit etmez.
+
+
+
+Anatomik Bölge Puanlaması ($S_{bölge}$) – Hayati RiskBu puanlama, kırığın olduğu yerin hayati organlara ve ana damar/sinir hatlarına yakınlığını esas alır.Kritik Bölgeler (5 Puan): Kafatası, Omurga, Pelvis.Gerekçe: Bu bölgeler merkezi sinir sistemini ve hayati iç organları korur. Buradaki bir kırık; beyin kanaması, felç veya durdurulamayan iç kanama (pelvis kırıklarında 2-3 litre kan kaybı olabilir) riski taşır.Yüksek Riskli (4 Puan): Femur, Göğüs Kafesi.Gerekçe: Femur (uyluk) kırığı, vücudun en büyük arteri olan femoral arterin kesilmesine yol açabilir. Kaburga kırıkları ise akciğer sönmesine (pnömotoraks) neden olabilir.Orta/Düşük Risk (3 Puan): El bileği, Ayak parmakları, Ön kol.Gerekçe: Hayati tehlike oluşturma ihtimali çok düşüktür; müdahale birkaç saat gecikse bile hayati bir risk doğurmaz.
+
+
+
+ Kırık Sayısı Çarpanı ($C_{sayi}$) – Travma EnerjisiBurada toplama yerine çarpan kullanılmasının sebebi, birden fazla kırığın travmanın şiddetini "doğrusal değil, katlanarak" artırmasıdır.1 Kırık (1.0x): Standart travma.2 Kırık (1.3x): Şiddetli travma.3+ Kırık (1.6x): Yüksek enerjili (Multitravma) travma. Vücudun şoka girme riskini temsil eder.
+
+
+
+Algoritma Formülü ve MantığıFormül: $(S_{tip} \times C_{sayi}) + S_{bölge}$Neden bu formül? Kırığın tipi ($S_{tip}$) ile sayısı ($C_{sayi}$) çarpılarak o bölgedeki "hasar yoğunluğu" hesaplanır. Ardından bu hasarın hangi bölgede ($S_{bölge}$) olduğu eklenerek toplam risk skoru bulunur.Örnek: Omurgada ($S_{bölge}=5$) tek bir hairline kırık ($S_{tip}=2$) bile olsa sonuç $7.0$ çıkar ve hasta otomatik olarak "Sarı - Acil" kategorisine girer. Bölge puanı, en küçük hasarı bile ciddiye almamızı sağlar.
+
+
+
+
+Aciliyet Seviyeleri ve Müdahale Protokolü
+Skordan çıkan sonuç, hastanelerdeki Triyaj (Triage) renk kodlarına göre sınıflandırılır:
+
+11.0 - 13.0 | SEVİYE 1: KRİTİK (Kırmızı): * Durum: Hayati tehlike anlık mevcuttur.
+
+Müdahale: Resüsitasyon (canlandırma) odası. Derhal ameliyat veya yoğun bakım.
+
+8.5 - 10.9 | SEVİYE 2: ÇOK ACİL (Turuncu): * Durum: Ciddi stabilite kaybı, organ hasarı riski yüksek.
+
+Müdahale: Maksimum 15 dakika içinde uzman doktor müdahalesi.
+
+6.5 - 8.4 | SEVİYE 3: ACİL (Sarı): * Durum: Hasta stabil görünebilir ama kırık cerrahi sınırındadır.
+
+Müdahale: 1 saat içinde müdahale ve detaylı tetkik.
+
+5.0 - 6.4 | SEVİYE 4: STANDART (Yeşil): * Durum: Hayati risk yok, lokal hasar.
+
+Müdahale: Ayaktan tedavi, alçı, atel veya rutin ortopedik takip.
+
+
+
+
+
+
+
+
+
+
+sonrasında bir web site tasarlandı ve bu web site kullanıcıların kırık fotoğraflarını yükleyip çıktı cevap alabilecekleri bir yer
+

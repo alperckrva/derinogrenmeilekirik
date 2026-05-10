@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Röntgen Kırık Analiz Sistemi</title>
+  <meta name="description" content="Yapay zeka destekli röntgen kırık tespit ve aciliyet analiz sistemi." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* =========================================================
+       RESET & TOKENS
+    ========================================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg         : #080c14;
+      --surface    : #0f1625;
+      --surface2   : #151d30;
+      --border     : #1e2d4a;
+      --cyan       : #00d4ff;
+      --cyan-dim   : #0099bb;
+      --text       : #e2e8f0;
+      --muted      : #64748b;
+      --red        : #ff4444;
+      --orange     : #ff8c00;
+      --yellow     : #ffd700;
+      --green      : #22c55e;
+      --radius     : 16px;
+      --radius-sm  : 10px;
+      --shadow     : 0 8px 40px rgba(0,0,0,.5);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* =========================================================
+       BACKGROUND GLOW
+    ========================================================= */
+    .bg-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 20% 10%, rgba(0,212,255,.07) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(0,120,200,.06) 0%, transparent 70%);
+    }
+
+    /* =========================================================
+       LAYOUT
+    ========================================================= */
+    .container {
+      position: relative; z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+    header {
+      padding: 28px 0 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-icon {
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, var(--cyan), #0066ff);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 24px rgba(0,212,255,.3);
+      flex-shrink: 0;
+    }
+
+    .logo-text h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 40%, var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+
+    .logo-text p {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .header-badge {
+      margin-left: auto;
+      background: rgba(0,212,255,.1);
+      border: 1px solid rgba(0,212,255,.25);
+      color: var(--cyan);
+      font-size: .7rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 99px;
+      letter-spacing: .05em;
+    }
+
+    /* =========================================================
+       HERO / UPLOAD SECTION
+    ========================================================= */
+    #upload-section {
+      padding: 60px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      transition: opacity .4s, transform .4s;
+    }
+
+    .hero-title {
+      text-align: center;
+    }
+
+    .hero-title h2 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #fff 30%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-title p {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: .95rem;
+      max-width: 480px;
+      margin-inline: auto;
+      line-height: 1.6;
+    }
+
+    .upload-card {
+      width: 100%;
+      max-width: 560px;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .3s, background .3s, transform .25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,212,255,.04), transparent);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .upload-card:hover, .upload-card.drag-over {
+      border-color: var(--cyan);
+      background: var(--surface2);
+      transform: translateY(-3px);
+    }
+
+    .upload-card:hover::before, .upload-card.drag-over::before { opacity: 1; }
+
+    .upload-icon {
+      font-size: 52px;
+      display: block;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+
+    .upload-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .upload-card p {
+      color: var(--muted);
+      font-size: .85rem;
+      margin-bottom: 24px;
+    }
+
+    .btn-upload {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--cyan), #0066ff);
+      color: #fff;
+      font-weight: 600;
+      font-size: .9rem;
+      padding: 12px 28px;
+      border-radius: 99px;
+      border: none;
+      cursor: pointer;
+      transition: opacity .2s, transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(0,212,255,.3);
+    }
+
+    .btn-upload:hover {
+      opacity: .9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,212,255,.4);
+    }
+
+    #file-input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .format-hint {
+      margin-top: 14px;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    /* =========================================================
+       LOADING SECTION
+    ========================================================= */
+    #loading-section {
+      display: none;
+      padding: 80px 0;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .spinner-wrap {
+      position: relative;
+      width: 90px; height: 90px;
+    }
+
+    .spinner {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--cyan);
+      animation: spin 1s linear infinite;
+    }
+
+    .spinner-inner {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 340px;
+      width: 100%;
+    }
+
+    .loading-steps li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: .875rem;
+      color: var(--muted);
+      transition: color .3s, border-color .3s;
+    }
+
+    .loading-steps li.active {
+      color: var(--cyan);
+      border-color: rgba(0,212,255,.3);
+    }
+
+    .loading-steps li.done {
+      color: var(--green);
+      border-color: rgba(34,197,94,.25);
+    }
+
+    .step-icon { font-size: 18px; }
+
+    /* =========================================================
+       RESULT SECTION
+    ========================================================= */
+    #result-section {
+      display: none;
+      padding: 40px 0 80px;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .result-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .btn-reset {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: .85rem;
+      font-weight: 500;
+      padding: 9px 20px;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+
+    .btn-reset:hover {
+      border-color: var(--cyan);
+      background: var(--surface);
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .result-grid { grid-template-columns: 1fr; }
+    }
+
+    /* =========================================================
+       IMAGE CARD
+    ========================================================= */
+    .image-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .image-card-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      flex-shrink: 0;
+    }
+
+    .image-card img {
+      width: 100%;
+      display: block;
+      object-fit: contain;
+      background: #000;
+      max-height: 520px;
+    }
+
+    .image-meta {
+      padding: 10px 18px;
+      display: flex;
+      justify-content: space-between;
+      font-size: .75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* =========================================================
+       REPORT CARD
+    ========================================================= */
+    .report-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .report-card-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+      font-size: .85rem; font-weight: 600;
+    }
+
+    .report-body { padding: 20px 18px; flex: 1; display: flex; flex-direction: column; gap: 18px; }
+
+    /* Urgency Badge */
+    .urgency-badge {
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .urgency-badge.red    { background: rgba(255,68,68,.12); border: 1px solid rgba(255,68,68,.35); }
+    .urgency-badge.orange { background: rgba(255,140,0,.12); border: 1px solid rgba(255,140,0,.35); }
+    .urgency-badge.yellow { background: rgba(255,215,0,.1);  border: 1px solid rgba(255,215,0,.3); }
+    .urgency-badge.green  { background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.3); }
+
+    .urgency-left .level {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      opacity: .7;
+      margin-bottom: 4px;
+    }
+
+    .urgency-left .name {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .urgency-left.red    .name { color: var(--red); }
+    .urgency-left.orange .name { color: var(--orange); }
+    .urgency-left.yellow .name { color: var(--yellow); }
+    .urgency-left.green  .name { color: var(--green); }
+
+    .urgency-score {
+      text-align: right;
+    }
+
+    .urgency-score .score-num {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .urgency-score .score-label {
+      font-size: .65rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .urgency-score.red    .score-num { color: var(--red); }
+    .urgency-score.orange .score-num { color: var(--orange); }
+    .urgency-score.yellow .score-num { color: var(--yellow); }
+    .urgency-score.green  .score-num { color: var(--green); }
+
+    /* Info rows */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+
+    .info-item .info-label {
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .info-item .info-value {
+      font-size: .9rem;
+      font-weight: 600;
+    }
+
+    .info-item .info-conf {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* Confidence bar */
+    .confidence-section {}
+
+    .conf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .conf-header span:first-child {
+      font-size: .8rem;
+      font-weight: 600;
+    }
+
+    .conf-pct {
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    .conf-bar-bg {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .conf-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan-dim), var(--cyan));
+      border-radius: 99px;
+      transition: width 1s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+
+    .conf-note {
+      margin-top: 6px;
+      font-size: .7rem;
+      color: var(--muted);
+    }
+
+    /* Formula */
+    .formula-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .formula-box span { color: var(--cyan); font-weight: 600; }
+
+    /* Recommendation */
+    .reco-box {
+      background: rgba(0,212,255,.05);
+      border: 1px solid rgba(0,212,255,.2);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: .83rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .reco-label {
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--cyan);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: .72rem;
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    /* =========================================================
+       NO FRACTURE CARD
+    ========================================================= */
+    .no-fracture-card {
+      background: var(--surface);
+      border: 1px solid rgba(34,197,94,.25);
+      border-radius: var(--radius);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 0 32px rgba(34,197,94,.08);
+    }
+
+    .no-fracture-card .big-icon { font-size: 52px; }
+    .no-fracture-card h3 { font-size: 1.4rem; font-weight: 800; color: var(--green); }
+    .no-fracture-card p { color: var(--muted); font-size: .9rem; text-align: center; max-width: 360px; line-height: 1.6; }
+    .no-fracture-card .conf-chip {
+      background: rgba(34,197,94,.12);
+      border: 1px solid rgba(34,197,94,.3);
+      color: var(--green);
+      font-size: .8rem;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 99px;
+    }
+
+    /* =========================================================
+       TOAST
+    ========================================================= */
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      font-size: .85rem;
+      color: var(--red);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .3s, transform .3s;
+      z-index: 999;
+      max-width: 360px;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* =========================================================
+       UTILITY
+    ========================================================= */
+    .hidden { display: none !important; }
+    .flex   { display: flex !important; }
+
+    /* Section transitions */
+    section {
+      transition: opacity .35s, transform .35s;
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo-icon">🦴</div>
+      <div class="logo-text">
+        <h1>Röntgen Kırık Analiz Sistemi</h1>
+        <p>Yapay Zeka Destekli Aciliyet Değerlendirmesi</p>
+      </div>
+      <span class="header-badge">AI · v1.0</span>
+    </div>
+  </div>
+</header>
+
+<!-- UPLOAD SECTION -->
+<section id="upload-section">
+  <div class="container" style="display:flex;flex-direction:column;align-items:center;gap:32px;width:100%">
+
+    <div class="hero-title">
+      <h2>Röntgen Görüntünüzü Yükleyin</h2>
+      <p>Yapay zeka modellerimiz kırıkları tespit edip işaretleyecek, ardından aciliyet raporunu hazırlayacak.</p>
+    </div>
+
+    <div class="upload-card" id="drop-zone">
+      <span class="upload-icon">🩻</span>
+      <h3>Görüntüyü buraya sürükleyin</h3>
+      <p>veya bilgisayarınızdan seçin</p>
+      <label for="file-input" class="btn-upload">
+        📂 Dosya Seç
+      </label>
+      <input type="file" id="file-input" accept="image/*" />
+      <p class="format-hint">JPG · PNG · JPEG &nbsp;|&nbsp; Maks. 20 MB</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- LOADING SECTION -->
+<section id="loading-section">
+  <div class="container" style="display:flex;flex-direction:column;align-items:center;gap:32px;width:100%">
+
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
+      <span class="spinner-inner">🧠</span>
+    </div>
+
+    <div style="text-align:center">
+      <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:6px">Analiz ediliyor…</h3>
+      <p style="color:var(--muted);font-size:.85rem">Modeller çalışıyor, lütfen bekleyin</p>
+    </div>
+
+    <ul class="loading-steps" id="loading-steps">
+      <li id="step-1"><span class="step-icon">🔍</span> Kırık tespiti yapılıyor…</li>
+      <li id="step-2"><span class="step-icon">📍</span> Kırık bölgeleri işaretleniyor…</li>
+      <li id="step-3"><span class="step-icon">🦴</span> Kırık türü belirleniyor…</li>
+      <li id="step-4"><span class="step-icon">🗺️</span> Anatomik bölge analiz ediliyor…</li>
+      <li id="step-5"><span class="step-icon">⚡</span> Aciliyet skoru hesaplanıyor…</li>
+    </ul>
+
+  </div>
+</section>
+
+<!-- RESULT SECTION -->
+<section id="result-section">
+  <div class="container">
+
+    <div class="result-header">
+      <h2>📊 Analiz Raporu</h2>
+      <button class="btn-reset" id="btn-reset">↩ Yeni Görüntü</button>
+    </div>
+
+    <!-- KIRIK YOK -->
+    <div id="no-fracture-section" class="hidden">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" id="no-fracture-grid">
+        <div class="image-card">
+          <div class="image-card-header"><div class="dot" style="background:var(--green);box-shadow:0 0 8px var(--green)"></div>Yüklenen Görüntü</div>
+          <img id="nf-image" src="" alt="Röntgen Görüntüsü" />
+          <div class="image-meta">
+            <span id="nf-goruntu">—</span>
+            <span id="nf-tarih">—</span>
+          </div>
+        </div>
+        <div class="no-fracture-card">
+          <span class="big-icon">✅</span>
+          <h3>KIRIK YOK</h3>
+          <p>Yapay zeka modelimiz bu röntgen görüntüsünde herhangi bir kemik kırığı tespit etmedi.</p>
+          <div class="conf-chip" id="nf-conf">—</div>
+          <p style="font-size:.75rem;color:var(--muted);margin-top:8px">Bu sistem bir karar destek aracıdır.<br/>Kesin tanı için uzman hekim değerlendirmesi gereklidir.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- KIRIK VAR -->
+    <div id="fracture-section" class="hidden">
+      <div class="result-grid">
+
+        <!-- SOL: Görüntü -->
+        <div class="image-card">
+          <div class="image-card-header">
+            <div class="dot"></div>
+            YOLO — Kırık Tespiti
+          </div>
+          <img id="annotated-img" src="" alt="İşaretlenmiş Röntgen" />
+          <div class="image-meta">
+            <span id="img-goruntu">—</span>
+            <span id="img-tarih">—</span>
+          </div>
+        </div>
+
+        <!-- SAĞ: Rapor -->
+        <div class="report-card">
+          <div class="report-card-header">
+            <div class="dot"></div>
+            Analiz Raporu
+          </div>
+          <div class="report-body">
+
+            <!-- ACİLİYET BADGE -->
+            <div class="urgency-badge" id="urgency-badge">
+              <div class="urgency-left" id="urgency-left">
+                <div class="level">Aciliyet Seviyesi</div>
+                <div class="name" id="urgency-name">—</div>
+              </div>
+              <div class="urgency-score" id="urgency-score-wrap">
+                <div class="score-num" id="urgency-score">—</div>
+                <div class="score-label">/ 13 puan</div>
+              </div>
+            </div>
+
+            <!-- BİLGİ GRID -->
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Kırık Tespiti</div>
+                <div class="info-value" style="color:var(--red)">KIRIK VAR ⚠️</div>
+                <div class="info-conf" id="info-tespit-conf">—</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Kırık Sayısı</div>
+                <div class="info-value" id="info-sayi">—</div>
+                <div class="info-conf">YOLO Tespiti</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Kırık Türü</div>
+                <div class="info-value" id="info-tur">—</div>
+                <div class="info-conf" id="info-tur-conf">—</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Anatomik Bölge</div>
+                <div class="info-value" id="info-anatomik">—</div>
+                <div class="info-conf" id="info-anatomik-conf">—</div>
+              </div>
+            </div>
+
+            <!-- GENEL GÜVEN ÇUBUĞU -->
+            <div class="confidence-section">
+              <div class="conf-header">
+                <span>Genel Model Güveni</span>
+                <span class="conf-pct" id="conf-pct-text">0%</span>
+              </div>
+              <div class="conf-bar-bg">
+                <div class="conf-bar-fill" id="conf-bar"></div>
+              </div>
+              <div class="conf-note">Tespit + Tür + Anatomik ortalama güven değeri</div>
+            </div>
+
+            <!-- FORMÜL -->
+            <div class="formula-box">
+              🧮 Formül: <span id="formula-text">—</span>
+            </div>
+
+            <!-- ÖNERİ -->
+            <div class="reco-box">
+              <div class="reco-label">📋 Klinik Öneri</div>
+              <div id="reco-text">—</div>
+            </div>
+
+            <!-- SORUMLULUK REDDİ -->
+            <div class="disclaimer">
+              ⚠️ Bu sistem bir karar destek aracıdır.<br/>
+              Kesin tanı için uzman hekim değerlendirmesi gereklidir.
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+<script>
+  const uploadSection  = document.getElementById('upload-section');
+  const loadingSection = document.getElementById('loading-section');
+  const resultSection  = document.getElementById('result-section');
+  const dropZone       = document.getElementById('drop-zone');
+  const fileInput      = document.getElementById('file-input');
+  const btnReset       = document.getElementById('btn-reset');
+  const toast          = document.getElementById('toast');
+
+  // ---- Drop & Pick ----
+  // Karttaki herhangi bir yere tıklanınca dosya dialog'u aç
+  dropZone.addEventListener('click', (e) => {
+    // Drag event'lerden gelen tıklamaları filtrele
+    fileInput.click();
+  });
+  fileInput.addEventListener('change', e => { if (e.target.files[0]) startAnalysis(e.target.files[0]); });
+
+  dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', e => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) startAnalysis(file);
+    else showToast('Lütfen geçerli bir görüntü dosyası seçin.');
+  });
+
+  btnReset.addEventListener('click', () => {
+    fileInput.value = '';
+    show(uploadSection);
+    hide(resultSection);
+    hide(loadingSection);
+    document.getElementById('fracture-section').classList.add('hidden');
+    document.getElementById('no-fracture-section').classList.add('hidden');
+  });
+
+  // ---- Loading steps animation ----
+  const steps    = ['step-1','step-2','step-3','step-4','step-5'];
+  let stepTimers = [];
+
+  function animateSteps() {
+    steps.forEach(id => {
+      document.getElementById(id).className = '';
+    });
+    steps.forEach((id, i) => {
+      const t = setTimeout(() => {
+        if (i > 0) document.getElementById(steps[i-1]).className = 'done';
+        document.getElementById(id).className = 'active';
+      }, i * 900);
+      stepTimers.push(t);
+    });
+  }
+
+  function clearStepTimers() {
+    stepTimers.forEach(t => clearTimeout(t));
+    stepTimers = [];
+  }
+
+  // ---- Main analysis ----
+  async function startAnalysis(file) {
+    hide(uploadSection);
+    show(loadingSection, 'flex');
+    animateSteps();
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res  = await fetch('/analyze', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      clearStepTimers();
+      steps.forEach(id => document.getElementById(id).className = 'done');
+
+      await delay(500);
+
+      hide(loadingSection);
+      renderResult(data);
+      show(resultSection, 'flex');
+
+    } catch (err) {
+      clearStepTimers();
+      hide(loadingSection);
+      show(uploadSection);
+      showToast('Sunucuya ulaşılamadı. App.py çalışıyor mu? (' + err.message + ')');
+    }
+  }
+
+  // ---- Render ----
+  function renderResult(data) {
+    if (data.error) {
+      showToast('Hata: ' + data.error);
+      show(uploadSection);
+      return;
+    }
+
+    if (!data.kirik_var) {
+      // KIRIK YOK
+      document.getElementById('no-fracture-section').classList.remove('hidden');
+      document.getElementById('fracture-section').classList.add('hidden');
+      document.getElementById('nf-image').src    = data.annotated_image;
+      document.getElementById('nf-goruntu').textContent = data.goruntu;
+      document.getElementById('nf-tarih').textContent   = data.tarih;
+      document.getElementById('nf-conf').textContent    = `Model Güveni: %${data.tespit_conf}`;
+      return;
+    }
+
+    // KIRIK VAR
+    document.getElementById('fracture-section').classList.remove('hidden');
+    document.getElementById('no-fracture-section').classList.add('hidden');
+
+    // Görüntü
+    document.getElementById('annotated-img').src        = data.annotated_image;
+    document.getElementById('img-goruntu').textContent  = data.goruntu;
+    document.getElementById('img-tarih').textContent    = data.tarih;
+
+    // Aciliyet badge
+    const badge = document.getElementById('urgency-badge');
+    const ul    = document.getElementById('urgency-left');
+    const sw    = document.getElementById('urgency-score-wrap');
+    badge.className         = `urgency-badge ${data.renk}`;
+    ul.className            = `urgency-left ${data.renk}`;
+    sw.className            = `urgency-score ${data.renk}`;
+    document.getElementById('urgency-name').textContent  = data.renk_emoji + ' ' + data.seviye_ad;
+    document.getElementById('urgency-score').textContent = data.skor;
+
+    // Info
+    document.getElementById('info-tespit-conf').textContent  = `Model Güveni: %${data.tespit_conf}`;
+    document.getElementById('info-sayi').textContent          = `${data.kirik_sayisi} adet`;
+    document.getElementById('info-tur').textContent           = data.kiriktur;
+    document.getElementById('info-tur-conf').textContent      = `Model Güveni: %${data.kiriktur_conf}`;
+    document.getElementById('info-anatomik').textContent      = data.anatomik;
+    document.getElementById('info-anatomik-conf').textContent = `Model Güveni: %${data.anatomik_conf}`;
+
+    // Güven çubuğu — animasyonlu
+    document.getElementById('conf-pct-text').textContent = `%${data.genel_guven}`;
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        document.getElementById('conf-bar').style.width = data.genel_guven + '%';
+      }, 100);
+    });
+
+    // Formül & öneri
+    document.getElementById('formula-text').textContent = data.formul;
+    document.getElementById('reco-text').textContent    = data.oneri;
+  }
+
+  // ---- Helpers ----
+  function show(el, display = 'flex') { el.style.display = display; }
+  function hide(el)                   { el.style.display = 'none'; }
+  function delay(ms)                  { return new Promise(r => setTimeout(r, ms)); }
+
+  let toastTimer;
+  function showToast(msg) {
+    toast.textContent = '⚠️ ' + msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+  }
+</script>
+
+</body>
+</html>

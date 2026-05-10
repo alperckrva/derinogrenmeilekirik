@@ -1,0 +1,19 @@
+=================================================================
+       RÖNTGEN KIRIK ANALİZ RAPORU
+=================================================================
+Görüntü      : kirikyok1.jpg
+Tarih/Saat   : 03/04/2026 14:18:51
+-----------------------------------------------------------------
+KIRIK TESPİT  : KIRIK VAR  (Model güveni: %100.0)
+KIRIK SAYISI  : 1 adet
+KIRIK TÜRÜ    : dislocation_articular  (Model güveni: %51.2)
+ANATOMİK BÖLGE: chest  (Model güveni: %91.4)
+-----------------------------------------------------------------
+ACİLİYET SKORU    : 8.0  (Genel Güven: %80.9)
+  Formül          : (Stip=4 x Csayi=1.0) + Sbölge=4 = 8.0
+SEVİYE 3           : 🟡 SARI -- ACİL
+  Öneri           : Orta Öncelik — Hastanın durumu stabil ancak cerrahi sınırda. 1 saat içinde müdahale.
+=================================================================
+NOT: Bu sistem bir karar destek aracidir.
+     Kesin tani icin uzman hekim degerlendirmesi gereklidir.
+=================================================================

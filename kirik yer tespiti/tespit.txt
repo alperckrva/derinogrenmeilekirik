@@ -1,0 +1,14 @@
+Görüntü Sayısı= 3989 	val görüntü sayısı
+Nesne Sayısı= 3402 	val setinde toplam kırık etiketi sayısı
+Precision (P)= 0.894 	Modelin yaptığı tespitler %89.4 gerçekten kırık
+Recall (R)= 0.854 	Veri setindeki kırıkların %85.4 ünü tespit ediyor
+(mean Average Precision)= 0.921 	ortalama doğruluk
+
+
+
+
+Metrik,Değer,Anlamı Nedir?
+Precision (P),0.902,"Model bir yere ""kırık"" dediğinde, %90.2 ihtimalle haklı çıkıyor. Yanlış alarm (false positive) verme oranı çok düşük."
+Recall (R),0.861,Görüntülerdeki tüm kırıkların %86.1'ini yakalamayı başarmış. Gözden kaçırdığı (false negative) kırık oranı sadece %14 civarında.
+mAP50,0.930,Sınırlayıcı kutuların (karelerin) doğruluğu %93. Yani model kırığın tam yerini neredeyse kusursuz buluyor.
+mAP50-95,0.545,"Bu, kutuların kırığı ne kadar dar/sıkı kavradığını gösterir. 0.50 üstü bu aşama için gayet iyidir."

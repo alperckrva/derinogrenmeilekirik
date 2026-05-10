@@ -1,0 +1,26 @@
+=================================================================
+       RÖNTGEN KIRIK ANALİZ RAPORU
+=================================================================
+Görüntü      : kırık1_avulsion.png
+Tarih/Saat   : 02/04/2026 01:48:33
+-----------------------------------------------------------------
+KIRIK TESPİT  : KIRIK VAR  (Model güveni: %86.5)
+KIRIK SAYISI  : 1 adet
+KIRIK TÜRÜ    : avulsion  (Model güveni: %87.8)
+ANATOMİK BÖLGE: hand  (Model güveni: %95.1)
+-----------------------------------------------------------------
+ACİLİYET SKORU    : 6.0
+  Formül          : (Stip=3 x Csayi=1.0) + Sbölge=3 = 6.0
+SEVİYE 4           : 🟢 YEŞİL -- STANDART
+  Öneri           : Düşük Öncelik — Hayati risk yok. Ayaktan tedavi veya rutin alçı/atel işlemleri.
+=================================================================
+MODEL DOGRULUK ORANLARI
+-----------------------------------------------------------------
+  Kirik Tespit    (Custom CNN)      : %93
+  Kirik Sayisi    (YOLO)            : %92
+  Anatomik Bolge  (DenseNet121)     : %99
+  Kirik Turu      (EfficientNet-B3) : %55
+=================================================================
+NOT: Bu sistem bir karar destek aracidir.
+     Kesin tani icin uzman hekim degerlendirmesi gereklidir.
+=================================================================

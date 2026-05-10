@@ -1,0 +1,53 @@
+#5 pool uyguladık görüntü en son 13*13 boyutunda
+#outchannels=64 den başlattık
+#outfeatures=1024 den başlattık
+#conv içinde= kernel_size=3,padding=1,stride=1
+#pool içinde= kernel_size=2,stride=2
+#dropout= 0.5 ile başladık
+
+loss fonk= CrossEntropyLoss
+optimizer için AdamW kullandık
+batch_size=16 denemesi
+
+lr=0.001 ile başlayacağız ve her 10 epoch ta yarıya düşüreceğiz
+weight_decay= 0.0001 ile başladık
+epoch=40 ile başladık
+
+transforms.RandomRotation(10),
+transforms.RandomPerspective(distortion_scale=0.05,p=0.5),
+transforms.ColorJitter(brightness=0.1,contrast=0.2),
+
+Epoch 39/40, Kayip: 0.1445, Dogruluk: 94.43% ,LR: 0.000125
+Epoch 40/40, Kayip: 0.1426, Dogruluk: 94.69% ,LR: 0.000063
+
+Egitim Tamamlandi. Final Egitim Dogrulugu: 94.69%
+
+
+ test Doğruluğu = 92.63%
+
+Classification Report:
+              precision    recall  f1-score   support
+
+   Kirik Yok       0.89      0.90      0.90       709
+   Kirik Var       0.95      0.94      0.94      1286
+
+    accuracy                           0.93      1995
+   macro avg       0.92      0.92      0.92      1995
+weighted avg       0.93      0.93      0.93      1995
+
+
+ train Doğruluğu = 95.55%
+
+Classification Report:
+              precision    recall  f1-score   support
+
+   Kirik Yok       0.91      0.95      0.93      9346
+   Kirik Var       0.98      0.96      0.97     19340
+
+    accuracy                           0.96     28686
+   macro avg       0.95      0.95      0.95     28686
+weighted avg       0.96      0.96      0.96     28686
+
+
+
+

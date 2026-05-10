@@ -1,0 +1,26 @@
+=================================================================
+       RÖNTGEN KIRIK ANALİZ RAPORU
+=================================================================
+Görüntü      : kırık8_simple.png
+Tarih/Saat   : 02/04/2026 01:48:34
+-----------------------------------------------------------------
+KIRIK TESPİT  : KIRIK VAR  (Model güveni: %55.0)
+KIRIK SAYISI  : 1 adet
+KIRIK TÜRÜ    : simple_linear_oblique  (Model güveni: %57.9)
+ANATOMİK BÖLGE: forearm  (Model güveni: %93.0)
+-----------------------------------------------------------------
+ACİLİYET SKORU    : 5.0
+  Formül          : (Stip=2 x Csayi=1.0) + Sbölge=3 = 5.0
+SEVİYE 4           : 🟢 YEŞİL -- STANDART
+  Öneri           : Düşük Öncelik — Hayati risk yok. Ayaktan tedavi veya rutin alçı/atel işlemleri.
+=================================================================
+MODEL DOGRULUK ORANLARI
+-----------------------------------------------------------------
+  Kirik Tespit    (Custom CNN)      : %93
+  Kirik Sayisi    (YOLO)            : %92
+  Anatomik Bolge  (DenseNet121)     : %99
+  Kirik Turu      (EfficientNet-B3) : %55
+=================================================================
+NOT: Bu sistem bir karar destek aracidir.
+     Kesin tani icin uzman hekim degerlendirmesi gereklidir.
+=================================================================

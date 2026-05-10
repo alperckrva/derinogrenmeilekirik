@@ -1,0 +1,9 @@
+@"
+__pycache__/
+*.pyc
+uploads/
+*.pth
+*.pt
+*.db
+*.sqlite
+"@ | Out-File -FilePath ".gitignore" -Encoding utf8

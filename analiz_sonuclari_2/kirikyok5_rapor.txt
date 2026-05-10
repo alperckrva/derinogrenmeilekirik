@@ -1,0 +1,26 @@
+=================================================================
+       RÖNTGEN KIRIK ANALİZ RAPORU
+=================================================================
+Görüntü      : kirikyok5.jpg
+Tarih/Saat   : 02/04/2026 01:48:35
+-----------------------------------------------------------------
+KIRIK TESPİT  : KIRIK VAR  (Model güveni: %74.7)
+KIRIK SAYISI  : 1 adet
+KIRIK TÜRÜ    : dislocation_articular  (Model güveni: %38.1)
+ANATOMİK BÖLGE: elbow  (Model güveni: %77.6)
+-----------------------------------------------------------------
+ACİLİYET SKORU    : 7.0
+  Formül          : (Stip=4 x Csayi=1.0) + Sbölge=3 = 7.0
+SEVİYE 3           : 🟡 SARI -- ACİL
+  Öneri           : Orta Öncelik — Hastanın durumu stabil ancak cerrahi sınırda. 1 saat içinde müdahale.
+=================================================================
+MODEL DOGRULUK ORANLARI
+-----------------------------------------------------------------
+  Kirik Tespit    (Custom CNN)      : %93
+  Kirik Sayisi    (YOLO)            : %92
+  Anatomik Bolge  (DenseNet121)     : %99
+  Kirik Turu      (EfficientNet-B3) : %55
+=================================================================
+NOT: Bu sistem bir karar destek aracidir.
+     Kesin tani icin uzman hekim degerlendirmesi gereklidir.
+=================================================================
